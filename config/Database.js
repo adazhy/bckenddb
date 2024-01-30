@@ -1,8 +1,11 @@
-import {Sequelize} from "sequelize";
+// import mysql from "mysql2/promise"
+const mysql = require("mysql2/promise")
 
-const db = new Sequelize('crud_db','root','',{
+
+const connection = mysql.createPool({
     host: 'localhost',
-    dialect: 'mysql'
-});
+    user: 'root',
+    database: 'dbcoba', 
+  });
 
-export default db;
+  module.exports= {connection}
