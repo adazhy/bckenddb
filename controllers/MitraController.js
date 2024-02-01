@@ -1,48 +1,92 @@
 const{connection}=require("../config/Database")
 
-async function mitra(){
+
+const mitra = async function (req, res) {
     const conn = await connection.getConnection()
     try {
-       const results = await conn.query(
-        
-        //   'SELECT * FROM user where nama = ?', ['tes']
-        `SELECT * FROM mitra_cuci_kendaraan`,[]
-        ); 
+        const query = await conn.query('SELECT * FROM mitra_cuci_kendaraan');
 
-        console.log(results[0]);
-    } catch (error) {
-        console.log(error);
+        const data = query[0];
+
+        res.status(200).json(data);
+    }catch (err) {
+        console.log(err);
+        res.status(5000).json({ error: "Internal server error"});
+    } finally {
+        conn.release();
     }
 }
 
-async function tambah3(){
-    const conn = await connection.getConnection()
+// INSERT
+const insert = async function(req,res) {
+    const conn = await connection.getConnection();
     try {
+        const {nm, al, no, em, jo, sm, r, jr} = req.body
 
-       const results = await conn.query(
-        `INSERT into 
-            mitra_cuci_kendaraan (id, nama_mitra, alamat, no_hp, email, jam_operasional, status_mitra, rating, jumlah_review) 
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [2,'PT NF', 'Jl.Lenteng Agung', '08123467859302', 'enef@gmail.com', '07:20', 'Non Aktif', '9,6', '100']
-        ); 
+        const testing = await conn.query(
+            'INSERT INTO mitra_cuci_kendaraan (nama_mitra, alamat, no_hp, email, jam_operasional, status_mitra, rating, jumlah_review) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [nm, al, no, em, jo, sm, r, jr]
+        );
+    
+        const data = testing[0];
 
-        console.log(results);
-    } catch (error) {
-        console.log(error);
+        res.status(200).json('Data User Succesfully Inserted')
+    } catch (err) {
+        console.log(err);
+        response.status(5000).json({ error: "Internal server error"});
+    } finally {
+        conn.release()
     }
 }
 
-async function apus3(){
-    const conn = await connection.getConnection()
+//UPDATE
+const update = async function(req,res) {
+    const conn = await connection.getConnection();
     try {
+        console.log(req.body);
 
-       const results = await conn.query(
-        `DELETE FROM mitra_cuci_kendaraan WHERE id=2`, []
-        ); 
+        const {sm} = req.body
+        const {id} = req.params
+        console.log(id);
 
-        console.log(results);
-    } catch (error) {
-        console.log(error);
+        const testing = await conn.query(
+        'UPDATE mitra_cuci_kendaraan SET status_mitra=? WHERE id=?',
+        [sm, id]
+        )
+
+        const data = testing[0];
+
+        res.status(200).json('Data User Successfully Update')
+    } catch (err) {
+        console.log(err);
+        response.status(5000).json({ error: "Internal server error"});
+    } finally {
+        conn.release()
     }
 }
 
-tambah3()
+//DELETE
+const deletemitra = async function(req,res) {
+    const conn = await connection.getConnection();
+    const { id } = req.params
+    try {
+        const testing = await conn.query(
+          'DELETE FROM mitra_cuci_kendaraan WHERE id = ?',
+          [id]
+        );
+
+        res.status(200).json('User Successfully Deleted');
+    } catch (err) {
+        console.log(err);
+        res.status(5000).json({ error: "Internal server error" });
+    } finally {
+        conn.release();
+    }
+}
+
+module.exports = {
+    mitra,
+    insert,
+    update,
+    deletemitra
+}

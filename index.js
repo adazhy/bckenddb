@@ -1,10 +1,11 @@
-// import express from "express";
-// import cors from "cors";
-// import UserRoute from "./routes/UserRoute.js";
+// const RiwayatRouter = require("./router/RiwayatRouter.js")
+const UserRoute = require("./router/UserRouter.js");
+const express = require("express");
+require('dotenv').config()
 
-// const app = express();
-// app.use(cors());
-// app.use(express.json());
-// app.use(UserRoute);
+const app = express();
+app.use(express.json());
 
-// app.listen(5000, ()=> console.log('Server up and running...'));
+app.use(UserRoute);
+
+app.listen(process.env.PORT, ()=> console.log('Server up and Running...'));

@@ -1,48 +1,99 @@
-const{connection}=require("../config/Database")
+const{connection} = require("../config/Database.js")
 
-async function riwayat(){
-    const conn = await connection.getConnection()
-    try {
-       const results = await conn.query(
-        
-        //   'SELECT * FROM user where nama = ?', ['tes']
-        `SELECT * FROM riwayat_transaksi`,[]
-        ); 
+// ROUTING
+const riwayat = async function (req, res) {
+  const conn = await connection.getConnection()
+  try {
+    const query = await conn.query('SELECT * FROM riwayat_transaksi');
 
-        console.log(results[0]);
-    } catch (error) {
-        console.log(error);
-    }
+    const data = query[0];
+
+    res.status(200).json(data)
+  } catch (err) {
+    console.log(err);
+    response.status(5000).json({ error: "Internal server error"});
+  } finally {
+    conn.release();
+  }
 }
 
-async function tambah7(id, wt){
-    const conn = await connection.getConnection()
-    try {
+//INSERT
+const insert = async function (req, res) {
+  const conn = await connection.getConnection()
+  try {
 
-       const results = await conn.query(
-        `INSERT INTO 
-        riwayat_transaksi (waktu_transaksi)
-        VALUE (?)`, [id, wt]
-        ); 
+    // return 
+    const {id_user, id_booking, id_pembayaran, waktu_transaksi} = req.body
 
-        console.log(results);
-    } catch (error) {
-        console.log(error);
-    }
+    const testing = await conn.query(
+      'INSERT INTO riwayat_transaksi (id_user, id_booking, id_pembayaran, waktu_transaksi) VALUES (?, ?, ?, ?)',
+      [id_user, id_booking, id_pembayaran, waktu_transaksi]
+    );
+
+    const data = testing[0];
+
+    res.status(200).json('Data User Successfully Inserted')
+  } catch (err) {
+    console.log(err);
+    response.status(5000).json({ error: "Internal server error"});
+  } finally {
+    conn.release()
+  }
 }
 
-async function apus7(){
-    const conn = await connection.getConnection()
-    try {
+//UPDATE
+const update = async function (req, res) {
+  const conn = await connection.getConnection()
+  try {
+    console.log(req.body);
 
-       const results = await conn.query(
-        `DELETE FROM riwayat_transaksi WHERE id=2`, []
-        ); 
+    // return 
+    const {waktu_transaksi} = req.body
+    const {id} = req.params
+    console.log(id);
 
-        console.log(results);
-    } catch (error) {
-        console.log(error);
-    }
+    const testing = await conn.query(
+      'UPDATE riwayat_transaksi SET waktu_transaksi=? WHERE id=?',
+      [waktu_transaksi, id]
+    );
+
+    const data = testing[0];
+
+    res.status(200).json('Data User Successfully Update')
+  } catch (err) {
+    console.log(err);
+    response.status(5000).json({ error: "Internal server error"});
+  } finally {
+    conn.release()
+  }
 }
 
-tambah7(2,'2024-01-13 19:00:11')
+
+
+// DELETE
+const deleteDate = async function (req, res) {
+  const conn = await connection.getConnection();
+  const { id } = req.params;
+
+  try {
+    const testing = await conn.query(
+      'DELETE FROM riwayat_transaksi WHERE id = ?',
+      [id]
+    );
+
+    res.status(200).json('User Successfully Deleted');
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    conn.release();
+  }
+}
+
+
+module.exports = {
+  riwayat, 
+  insert, 
+  update, 
+  deleteDate
+};

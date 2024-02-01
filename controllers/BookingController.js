@@ -1,70 +1,96 @@
-//fungsi dipanggil satu kali disetiap file controller yang membutuhkan koneksi kedatabase
 const{connection}=require("../config/Database")
 
-//struktur pemanggilan fungsi di semua controller 
-async function booking(){
+const booking = async function (req, res) {
     const conn = await connection.getConnection()
     try {
-       const results = await conn.query(
-        
-        //   'SELECT * FROM user where nama = ?', ['tes']
-        `SELECT * FROM booking_cuci_kendaraan`,[]
-        ); 
-
-        console.log(results[0]);
-    } catch (error) {
-        console.log(error);
-    }  finally {
-        conn.release()
-    }
-}
-
-async function tambah2() {
-    const conn = await connection.getConnection();
-    try {
-        const results = await conn.query(
-            `INSERT INTO 
-                booking_cuci_kendaraan (id, id_user, jenis_kendaraan, waktu_booking, metode_pembayaran, total_pembayaran, status_booking) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)`, [5, 5, 'becak', '2024-01-26 23:46:25', 'nnti', '120.000', 'Belum_Dikonfirmasi']
-        );
-
-        console.log(results);
-    } catch (error) {
-        console.log(error);
+      const query = await conn.query('SELECT * FROM booking_cuci_kendaraan');
+  
+      const data = query[0];
+  
+      res.status(200).json(data)
+    } catch (err) {
+      console.log(err);
+      response.status(5000).json({ error: "Internal server error"});
     } finally {
-        conn.release();
+      conn.release();
     }
-}
-
-async function update2(){
+  }
+  
+  //INSERT
+  const insert = async function (req, res) {
     const conn = await connection.getConnection()
     try {
-
-       const results = await conn.query(
-        `UPDATE booking_cuci_kendaraan` +
-        ` SET status_booking = 'Dikonfirmasi', id_user = '6' ` +
-        
-        `WHERE id = 5;`
-        ); 
-
-        console.log(results);
-    } catch (error) {
-        console.log(error);
+  
+      // return 
+      const {jk, wb, mp, tp, sb} = req.body
+  
+      const testing = await conn.query(
+        'INSERT INTO booking_cuci_kendaraan (jenis_kendaraan, waktu_booking, metode_pembayaran, total_pembayaran, status_booking) VALUES (?, ?, ?, ?, ?)',
+        [jk, wb, mp, tp, sb]
+      );
+  
+      const data = testing[0];
+  
+      res.status(200).json('Data User Successfully Inserted')
+    } catch (err) {
+      console.log(err);
+      response.status(5000).json({ error: "Internal server error"});
+    } finally {
+      conn.release()
     }
-}
-
-async function apus2(){
+  }
+  
+  //UPDATE
+  const update = async function (req, res) {
     const conn = await connection.getConnection()
     try {
-
-       const results = await conn.query(
-        `DELETE FROM pembayaran_cuci_kendaraan WHERE id=4`, []
-        ); 
-
-        console.log(results);
-    } catch (error) {
-        console.log(error);
+      console.log(req.body);
+  
+      // return 
+      const {sb} = req.body
+      const {id} = req.params
+      console.log(id);
+  
+      const testing = await conn.query(
+        'UPDATE booking_cuci_kendaraan SET status_booking=? WHERE id=?',
+        [sb, id]
+      );
+  
+      const data = testing[0];
+  
+      res.status(200).json('Data User Successfully Update')
+    } catch (err) {
+      console.log(err);
+      response.status(5000).json({ error: "Internal server error"});
+    } finally {
+      conn.release()
     }
-}
+  }
+  
+  
+  // DELETE
+  const deleteBooking = async function (req, res) {
+    const conn = await connection.getConnection();
+    const { id } = req.params;
+  
+    try {
+      const testing = await conn.query(
+        'DELETE FROM booking_cuci_kendaraan WHERE id = ?',
+        [id]
+      );
+  
+      res.status(200).json('User Successfully Deleted');
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: "Internal server error" });
+    } finally {
+      conn.release();
+    }
+  }
 
-update2();
+module.exports = {
+    booking,
+    insert,
+    update,
+    deleteBooking
+}

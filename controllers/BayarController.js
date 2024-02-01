@@ -1,98 +1,99 @@
 const{connection}=require("../config/Database")
 
-async function getAll(){
+
+const bayar= async function (req, res) {
     const conn = await connection.getConnection()
     try {
-       const results = await conn.query(
-        
-        //   'SELECT * FROM user where nama = ?', ['tes']
-        `SELECT * FROM pembayaran_cuci_kendaraan`,[]
-        ); 
-
-        console.log(results[0]);
-    } catch (error) {
-        console.log(error);
+      const query = await conn.query('SELECT * FROM pembayaran_cuci_kendaraan');
+  
+      const data = query[0];
+  
+      res.status(200).json(data)
+    } catch (err) {
+      console.log(err);
+      response.status(5000).json({ error: "Internal server error"});
+    } finally {
+      conn.release();
     }
-}
-
-async function getOne(){
+  }
+  
+  //INSERT
+  const insert = async function (req, res) {
     const conn = await connection.getConnection()
     try {
-
-       const results = await conn.query(
-        `SELECT * FROM pembayaran_cuci_kendaraan where id = ?`,[]
-        ); 
-
-        console.log(results[0]);
-    } catch (error) {
-        console.log(error);
+  
+      // return 
+      const {wp, jp, tp, sp} = req.body
+  
+      const testing = await conn.query(
+        'INSERT INTO pembayaran_cuci_kendaraan (waktu_pembayaran, jenis_pembayaran, total_pembayaran, status_pembayaran) VALUES (?, ?, ?, ?)',
+        [wp, jp, tp, sp]
+      );
+  
+      const data = testing[0];
+  
+      res.status(200).json('Data User Successfully Inserted')
+    } catch (err) {
+      console.log(err);
+      response.status(5000).json({ error: "Internal server error"});
+    } finally {
+      conn.release()
     }
-}
-
-async function getOne(){
+  }
+  
+  //UPDATE
+  const update = async function (req, res) {
     const conn = await connection.getConnection()
     try {
-
-       const results = await conn.query(
-        `SELECT * FROM pembayaran_cuci_kendaraan where id = ?`,[]
-        ); 
-
-        console.log(results[0]);
-    } catch (error) {
-        console.log(error);
+      console.log(req.body);
+  
+      // return 
+      const {sp} = req.body
+      const {id} = req.params
+      console.log(id);
+  
+      const testing = await conn.query(
+        'UPDATE pembayaran_cuci_kendaraan SET status_pembayaran=? WHERE id=?',
+        [sp, id]
+      );
+  
+      const data = testing[0];
+  
+      res.status(200).json('Data User Successfully Update')
+    } catch (err) {
+      console.log(err);
+      response.status(5000).json({ error: "Internal server error"});
+    } finally {
+      conn.release()
     }
-}
-
-async function tambah1(wp, jp, tp, sp){
-    const conn = await connection.getConnection()
+  }
+  
+  
+  
+  // DELETE
+  const deletebayar = async function (req, res) {
+    const conn = await connection.getConnection();
+    const { id } = req.params;
+  
     try {
-
-       const results = await conn.query(
-        `INSERT into 
-            pembayaran_cuci_kendaraan (waktu_pembayaran, jenis_pembayaran, total_pembayaran, status_pembayaran) 
-            values (?, ?, ?, ?)`, [wp, jp, tp, sp]
-        ); 
-
-        console.log(results);
-    } catch (error) {
-        console.log(error);
-    } finally{
-        conn.release
+      const testing = await conn.query(
+        'DELETE FROM pembayaran_cuci_kendaraan WHERE id = ?',
+        [id]
+      );
+  
+      res.status(200).json('User Successfully Deleted');
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: "Internal server error" });
+    } finally {
+      conn.release();
     }
-}
-
-async function apus1(id){
-    const conn = await connection.getConnection()
-    try {
-
-       const results = await conn.query(
-        `DELETE FROM pembayaran_cuci_kendaraan WHERE id=?`, [id]
-        ); 
-
-        console.log(results);
-    } catch (error) {
-        console.log(error);
-    } finally{
-        conn.release
-    }
-}
-
-async function update1(st){
-    const conn = await connection.getConnection()
-    try {
-
-       const results = await conn.query(
-        ' UPDATE pembayaran_cuci_kendaraan ' +
-        ' SET status_pembayaran = ?' +
-        'WHERE id = 2', [st]
-        ); 
-
-        console.log(results);
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-// tambah1('2024-01-17 13:18:25', 'ngutang', 189000, 'Belum Dibayar')
-// apus1(11)
-update1('Ditolak')
+  }
+  
+  
+  module.exports = {
+    bayar,
+    insert,
+    update,
+    deletebayar
+  };

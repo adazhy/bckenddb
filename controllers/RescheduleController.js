@@ -1,71 +1,98 @@
 const{connection}=require("../config/Database")
 
-async function reschedule(){
+
+// ROUTING
+const reschedule = async function (req, res) {
     const conn = await connection.getConnection()
     try {
-       const results = await conn.query(
-            `SELECT * FROM reschedule_cuci_kendaraan`,[]
-        ); 
-
-        console.log(results[0]);
-    } catch (error) {
-        console.log(error);
-    } finally{
-        conn.release
-    }
-}
-
-async function tambah5(wrb, ar, sr){
-    const conn = await connection.getConnection()
-    try {
-
-       const results = await conn.query(
-        `INSERT into 
-            reschedule_cuci_kendaraan (waktu_reschedule_baru, alasan_reschedule, status_reschedule)
-            values (?, ?, ?)`, 
-            [wrb, ar, sr]
-        ); 
-
-        console.log(results);
-    } catch (error) {
-        console.log(error);
+      const query = await conn.query('SELECT * FROM reschedule_cuci_kendaraan');
+  
+      const data = query[0];
+  
+      res.status(200).json(data)
+    } catch (err) {
+      console.log(err);
+      response.status(5000).json({ error: "Internal server error"});
     } finally {
-        conn.release()
+      conn.release();
     }
-} 
-
-async function update5(ar){
+  }
+  
+  //INSERT
+  const insert = async function (req, res) {
     const conn = await connection.getConnection()
     try {
-        const results = await conn.query(
-            ' UPDATE reschedule_cuci_kendaraan ' +
-            ' SET alasan_reschedule = ? ' +
-            ' WHERE id = 5', [ar]
-        );
-    console.log(results);
-    } catch (error) {
-        console.log(error);
-    } finally{
-        conn.release
+  
+      const {wrb, ar, sr} = req.body;
+  
+      const testing = await conn.query(
+        'INSERT INTO reschedule_cuci_kendaraan (waktu_reschedule_baru, alasan_reschedule, status_reschedule) VALUES (?, ?, ?)',
+        [wrb, ar, sr]
+      );
+  
+      const data = testing[0];
+  
+      res.status(200).json('Data User Successfully Inserted');
+    } catch (err) {
+      console.log(err);
+      res.status(5000).json({ error: "Internal server error"});
+    } finally {
+      conn.release();
     }
-}
-
-async function apus5(id){
+  }
+  
+//   UPDATE
+  const update = async function (req, res) {
     const conn = await connection.getConnection()
     try {
-
-       const results = await conn.query(
-        `DELETE FROM pembayaran_cuci_kendaraan WHERE id=?`, [id]
-        ); 
-
-        console.log(results);
-    } catch (error) {
-        console.log(error);
-    } finally{
-        conn.release
+      console.log(req.body);
+  
+      // return 
+      const {wr} = req.body
+      const {id} = req.params
+      console.log(wr);
+  
+      const testing = await conn.query(
+        'UPDATE reschedule_cuci_kendaraan SET waktu_reschedule_baru =? WHERE id=?',
+        [wr, id]
+      );
+  
+      const data = testing[0];
+  
+      res.status(200).json('Data User Successfully Update')
+    } catch (err) {
+      console.log(err);
+      response.status(5000).json({ error: "Internal server error"});
+    } finally {
+      conn.release()
     }
-}
+  }
+  
+  
+  // DELETE
+  const deleteRes = async function (req, res) {
+    const conn = await connection.getConnection();
+    const { id } = req.params;
+  
+    try {
+      const testing = await conn.query(
+        'DELETE FROM reschedule_cuci_kendaraan WHERE id = ?' ,[id]
+      );
+  
+      res.status(200).json('User Successfully Deleted');
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: "Internal server error" });
+    } finally {
+      conn.release();
+    }
+  }
+  
+  
+  module.exports = {
+    reschedule,
+    insert,
+    update,
+    deleteRes
+  };
 
-// tambah5('2024-1-17 06:41:17', 'Mau login dulu', 'Menunggu Konfirmasi')
-// update5('Rahasia')
-apus5(6)

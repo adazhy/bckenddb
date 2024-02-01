@@ -1,68 +1,92 @@
+const { response } = require("express");
 const{connection}=require("../config/Database")
 
-async function notif(){
+const notif = async function (req, res) {
     const conn = await connection.getConnection()
     try {
-       const results = await conn.query(
-        
-        //   'SELECT * FROM user where nama = ?', ['tes']
-        `SELECT * FROM notifikasi_cuci_kendaraan`,[]
-        ); 
+        const query = await conn.query('SELECT * FROM notifikasi_cuci_kendaraan');
 
-        console.log(results[0]);
-    } catch (error) {
-        console.log(error);
+        const data = query[0];
+
+        res.status(200).json(data);
+    }catch (err) {
+        console.log(err);
+        res.status(5000).json({ error: "Internal server error"});
+    } finally {
+        conn.realease();
     }
 }
 
-async function tambah4(i, wk, sn){
-    const conn = await connection.getConnection()
+//INSERT
+const insert = async function(req,res) {
+    const conn = await connection.getConnection();
     try {
+        const {i, wk, sn} = req.body
 
-       const results = await conn.query(
-        `INSERT into 
-            notifikasi_cuci_kendaraan (isi_notifikasi, waktu_kirim, status_notifikasi) 
-            values (?, ?, ?)`, 
-            [i, wk, sn]
-        ); 
+        const testing = await conn.query(
+            'INSERT INTO notifikasi_cuci_kendaraan (isi_notifikasi, waktu_kirim, status_notifikasi) VALUES (?, ?, ?)',
+        [i, wk, sn]
+        );
+    
+        const data = testing[0];
 
-        console.log(results);
-    } catch (error) {
-        console.log(error);
+        res.status(200).json('Data User Succesfully Inserted')
+    } catch (err) {
+        console.log(err);
+        response.status(5000).json({ error: "Internal server error"});
+    } finally {
+        conn.release()
     }
 }
 
-async function update4(sn){
-    const conn = await connection.getConnection()
+//UPDATE
+const update = async function(req,res) {
+    const conn = await connection.getConnection();
     try {
+        console.log(req.body);
 
-       const results = await conn.query(
-            ' UPDATE notifikasi_cuci_kendaraan ' +
-            ' SET status_notifikasi = ?' +
-            'WHERE id = 2', [sn]
-        ); 
+        const {sn} = req.body
+        const {id} = req.params
+        console.log(id);
 
-        console.log(results);
-    } catch (error) {
-        console.log(error);
+        const testing = await conn.query(
+        'UPDATE notifikasi_cuci_kendaraan SET status_notifikasi=? WHERE id=?',
+        [sn, id]
+        )
+
+        const data = testing[0];
+
+        res.status(200).json('Data User Successfully Update')
+    } catch (err) {
+        console.log(err);
+        response.status(5000).json({ error: "Internal server error"});
+    } finally {
+        conn.release()
     }
 }
 
-async function apus4(id){
-    const conn = await connection.getConnection()
+//DELETE
+const deletenotif = async function(req,res) {
+    const conn = await connection.getConnection();
+    const { id } = req.params
     try {
+        const testing = await conn.query(
+          'DELETE FROM notifikasi_cuci_kendaraan WHERE id = ?',
+          [id]
+        );
 
-       const results = await conn.query(
-        `DELETE FROM notifikasi_cuci_kendaraan WHERE id=?`, [id]
-        ); 
-
-        console.log(results);
-    } catch (error) {
-        console.log(error);
+        res.status(200).json('User Successfully Deleted');
+    } catch (err) {
+        console.log(err);
+        res.status(5000).json({ error: "Internal server error" });
+    } finally {
+        conn.release();
     }
 }
 
-
-// tambah4('P balap', '2024-12-11 02:59:09', 'Belum Dibaca')
-// update4('Dibaca')
-apus4(35)
+module.exports = {
+    notif,
+    insert,
+    update,
+    deletenotif
+}
